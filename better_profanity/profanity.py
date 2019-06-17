@@ -180,3 +180,8 @@ def censor(text, censor_char="*"):
     if not CENSOR_WORDSET:
         load_censor_words()
     return hide_swear_words(text, censor_char)
+
+
+def return_profanity(text):
+    """Return a list of profane words in the text"""
+    return
