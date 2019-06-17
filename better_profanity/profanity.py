@@ -182,6 +182,61 @@ def censor(text, censor_char="*"):
     return hide_swear_words(text, censor_char)
 
 
+def find_profane_words(text):
+    profanity_list = []
+    cur_word = ""
+    skip_index = -1
+    next_words_indices = []
+    start_idx_of_next_word = get_start_index_of_next_word(text, 0)
+
+    # If there are no words in the text, return an empty list
+    if start_idx_of_next_word >= len(text) - 1:
+        return profanity_list
+
+    # Left strip the text, to avoid inaccurate parsing
+    if start_idx_of_next_word > 0:
+        text = text[start_idx_of_next_word:]
+
+    # Splitting each word in the text to compare with censored words
+    for index, char in iter(enumerate(text)):
+        if index < skip_index:
+            continue
+        if char in ALLOWED_CHARACTERS:
+            cur_word += char
+            continue
+
+        # Skip continuous non-allowed characters
+        if cur_word.strip() == "":
+            cur_word = ""
+            continue
+
+        # Iterate the next words combined with the current one
+        # to check if it forms a swear word
+        next_words_indices = update_next_words_indices(text, next_words_indices, index)
+        contains_swear_word, end_index = any_next_words_form_swear_word(
+            cur_word, text, next_words_indices, CENSOR_WORDSET
+        )
+        if contains_swear_word:
+            profanity_list.append(cur_word)
+            skip_index = end_index
+            char = ""
+            next_words_indices = []
+
+        # If the current a swear word
+        if cur_word.lower() in CENSOR_WORDSET:
+            profanity_list.append(cur_word)
+
+        cur_word = ""
+
+    # Final check
+    if cur_word != "" and skip_index < len(text) - 1:
+        if cur_word.lower() in CENSOR_WORDSET:
+            profanity_list.append(cur_word)
+    return profanity_list
+
+
 def return_profanity(text):
     """Return a list of profane words in the text"""
-    return
+    if not CENSOR_WORDSET:
+        load_censor_words()
+    return find_profane_words(text)
