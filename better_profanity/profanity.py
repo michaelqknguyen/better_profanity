@@ -213,11 +213,11 @@ def find_profane_words(text):
         # Iterate the next words combined with the current one
         # to check if it forms a swear word
         next_words_indices = update_next_words_indices(text, next_words_indices, index)
-        contains_swear_word, end_index = any_next_words_form_swear_word(
+        combined_swear_word, end_index = any_next_words_form_swear_word(
             cur_word, text, next_words_indices, CENSOR_WORDSET
         )
-        if contains_swear_word:
-            profanity_list.append(cur_word)
+        if combined_swear_word:
+            profanity_list.append(combined_swear_word)
             skip_index = end_index
             char = ""
             next_words_indices = []
